@@ -1,25 +1,25 @@
-const notes = [
-  {
-    title: "欢迎使用我的知识库",
-    summary: "这是第一篇示例笔记。以后，你可以在这里保存自己的知识。",
-    tag: "开始",
-    date: "2026-10-05",
-  },
-  {
-    title: "Next.js 学习笔记",
-    summary: "Next.js 可以帮助我们创建现代网站，同时处理页面和后台逻辑。",
-    tag: "编程",
-    date: "2026-10-05",
-  },
-  {
-    title: "我的阅读清单",
-    summary: "记录想读的书、读书进度，以及读完后的心得。",
-    tag: "阅读",
-    date: "2026-10-04",
-  },
-];
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getNotes, initialNotes } from "@/lib/note-storage";
+import type { Note } from "@/types/note";
+
+const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
+  timeZone: "Asia/Shanghai",
+});
+
+function createSummary(content: string) {
+  return content.length > 70 ? `${content.slice(0, 70)}……` : content;
+}
 
 export default function Home() {
+  const [notes, setNotes] = useState<Note[]>(initialNotes);
+
+  useEffect(() => {
+    setNotes(getNotes());
+  }, []);
+
   return (
     <main>
       <header className="hero">
@@ -28,7 +28,9 @@ export default function Home() {
           <h1>我的知识库</h1>
           <p className="intro">记录想法，整理知识，让需要的信息随时可以找到。</p>
         </div>
-        <button type="button">＋ 新建笔记</button>
+        <Link className="primary-button" href="/notes/new">
+          ＋ 新建笔记
+        </Link>
       </header>
 
       <section className="toolbar" aria-label="搜索笔记">
@@ -41,10 +43,12 @@ export default function Home() {
           <article className="note-card" key={note.title}>
             <div className="note-meta">
               <span className="tag">{note.tag}</span>
-              <time>{note.date}</time>
+              <time dateTime={note.createdAt}>
+                {dateFormatter.format(new Date(note.createdAt))}
+              </time>
             </div>
             <h2>{note.title}</h2>
-            <p>{note.summary}</p>
+            <p>{createSummary(note.content)}</p>
             <a href="#">阅读笔记 →</a>
           </article>
         ))}
