@@ -66,7 +66,7 @@ export default function Home() {
           </div>
         )}
         {!isLoading && !error && notes.map((note) => (
-          <article className="note-card" key={note.title}>
+          <article className="note-card" key={note.id}>
             <div className="note-meta">
               <span className="tag">{note.tag}</span>
               <time dateTime={note.createdAt}>
@@ -75,7 +75,7 @@ export default function Home() {
             </div>
             <h2>{note.title}</h2>
             <p>{createSummary(note.content)}</p>
-            <a href="#">阅读笔记 →</a>
+            <Link href={`/notes/${note.id}`}>阅读笔记 →</Link>
           </article>
         ))}
       </section>
