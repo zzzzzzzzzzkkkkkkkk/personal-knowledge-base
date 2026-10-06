@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getNotes, initialNotes } from "@/lib/note-storage";
 import type { Note } from "@/types/note";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -14,10 +13,26 @@ function createSummary(content: string) {
 }
 
 export default function Home() {
-  const [notes, setNotes] = useState<Note[]>(initialNotes);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setNotes(getNotes());
+    async function loadNotes() {
+      try {
+        const response = await fetch("/api/notes");
+        if (!response.ok) throw new Error("Failed to load notes");
+
+        const data: Note[] = await response.json();
+        setNotes(data);
+      } catch {
+        setError("读取笔记失败，请刷新页面重试。");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadNotes();
   }, []);
 
   return (
@@ -39,7 +54,18 @@ export default function Home() {
       </section>
 
       <section className="notes" aria-label="笔记列表">
-        {notes.map((note) => (
+        {isLoading && <p className="status-message">正在读取笔记……</p>}
+        {!isLoading && error && <p className="status-message error-message">{error}</p>}
+        {!isLoading && !error && notes.length === 0 && (
+          <div className="empty-state">
+            <h2>还没有笔记</h2>
+            <p>创建第一篇笔记，开始积累自己的知识。</p>
+            <Link className="text-link" href="/notes/new">
+              新建第一篇笔记 →
+            </Link>
+          </div>
+        )}
+        {!isLoading && !error && notes.map((note) => (
           <article className="note-card" key={note.title}>
             <div className="note-meta">
               <span className="tag">{note.tag}</span>

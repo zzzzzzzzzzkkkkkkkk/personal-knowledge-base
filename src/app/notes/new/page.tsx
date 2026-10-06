@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { addNote } from "@/lib/note-storage";
-import type { Note } from "@/types/note";
 
 export default function NewNotePage() {
   const router = useRouter();
@@ -12,8 +10,9 @@ export default function NewNotePage() {
   const [content, setContent] = useState("");
   const [tag, setTag] = useState("");
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const cleanTitle = title.trim();
@@ -25,16 +24,31 @@ export default function NewNotePage() {
       return;
     }
 
-    const note: Note = {
-      id: crypto.randomUUID(),
-      title: cleanTitle,
-      content: cleanContent,
-      tag: cleanTag || "未分类",
-      createdAt: new Date().toISOString(),
-    };
+    setError("");
+    setIsSaving(true);
 
-    addNote(note);
-    router.push("/");
+    try {
+      const response = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: cleanTitle,
+          content: cleanContent,
+          tag: cleanTag,
+        }),
+      });
+
+      const result: { message?: string } = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "保存笔记失败。");
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "保存笔记失败。");
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -86,7 +100,9 @@ export default function NewNotePage() {
           <Link className="secondary-button" href="/">
             取消
           </Link>
-          <button type="submit">保存笔记</button>
+          <button type="submit" disabled={isSaving}>
+            {isSaving ? "正在保存……" : "保存笔记"}
+          </button>
         </div>
       </form>
     </main>

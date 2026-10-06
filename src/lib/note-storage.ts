@@ -9,6 +9,7 @@ export const initialNotes: Note[] = [
     content: "这是第一篇示例笔记。以后，你可以在这里保存自己的知识。",
     tag: "开始",
     createdAt: "2026-10-05T10:00:00.000Z",
+    updatedAt: "2026-10-05T10:00:00.000Z",
   },
   {
     id: "nextjs-notes",
@@ -16,6 +17,7 @@ export const initialNotes: Note[] = [
     content: "Next.js 可以帮助我们创建现代网站，同时处理页面和后台逻辑。",
     tag: "编程",
     createdAt: "2026-10-05T09:00:00.000Z",
+    updatedAt: "2026-10-05T09:00:00.000Z",
   },
   {
     id: "reading-list",
@@ -23,6 +25,7 @@ export const initialNotes: Note[] = [
     content: "记录想读的书、读书进度，以及读完后的心得。",
     tag: "阅读",
     createdAt: "2026-10-04T09:00:00.000Z",
+    updatedAt: "2026-10-04T09:00:00.000Z",
   },
 ];
 
@@ -35,7 +38,8 @@ function isNote(value: unknown): value is Note {
     typeof note.title === "string" &&
     typeof note.content === "string" &&
     typeof note.tag === "string" &&
-    typeof note.createdAt === "string"
+    typeof note.createdAt === "string" &&
+    typeof note.updatedAt === "string"
   );
 }
 
